@@ -57,7 +57,7 @@ function LinkGenerator() {
       {generatedLink && (
         <div>
           <p>Your custom link: <a href={generatedLink} onClick={handleLinkClick}>{generatedLink}</a></p>
-          <p>Link Click Count: {clickCount}</p>
+          {/* <p>Link Click Count: {clickCount}</p> */}
         </div>
       )}
     </div>
