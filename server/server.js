@@ -73,6 +73,78 @@
 
 
 
+// const express = require('express');
+// const mongoose = require('mongoose');
+// const cors = require('cors');
+// require('dotenv').config();
+
+// // Import the Link model
+// const Link = require('./models/Link'); // Ensure this path is correct based on your project structure
+
+// const app = express();
+// const PORT = process.env.PORT || 5001;
+// const ngrokUrl = 'https://7513-2405-201-8018-60b9-b927-e114-bcaf-47b2.ngrok-free.app'; // Your Ngrok URL
+
+// app.use(cors());
+// app.use(express.json());
+
+// // Connect to MongoDB
+// mongoose.connect(process.env.MONGO_URI)
+//   .then(() => console.log("MongoDB connected"))
+//   .catch(err => console.error("MongoDB connection error:", err));
+
+// // Define a basic route to verify the server is working
+// app.get('/', (req, res) => {
+//   res.send("Backend server is running!");
+// });
+
+// // Example link generation endpoint
+// app.post('/api/generate-link', async (req, res) => {
+//   const { email, brand } = req.body;
+
+//   // Generate a custom link with Ngrok URL
+//   const uniqueLink = `${ngrokUrl}/api/click/${brand}-${Date.now()}`;
+
+//   // Save the link to the database
+//   try {
+//     const newLink = new Link({ email, brand, link: uniqueLink });
+//     await newLink.save();
+//     res.json({ link: uniqueLink });
+//   } catch (error) {
+//     console.error("Error saving link:", error);
+//     res.status(500).json({ error: "Failed to save the link." });
+//   }
+// });
+
+// // Click count API endpoint
+// app.get('/api/click/:customLink', async (req, res) => {
+//   const { customLink } = req.params;
+
+//   try {
+//     // Find the link in the database and increment the click count
+//     const link = await Link.findOneAndUpdate(
+//       { link: `${ngrokUrl}/api/click/${customLink}` }, // Match the format of the saved link
+//       { $inc: { clickCount: 1 } }, // Increment the click count
+//       { new: true } // Return the updated document
+//     );
+
+//     if (link) {
+//       res.status(200).json({ clickCount: link.clickCount }); // Respond with the updated click count
+//     } else {
+//       res.status(404).json({ error: 'Link not found' });
+//     }
+//   } catch (error) {
+//     console.error("Error incrementing click count", error);
+//     res.status(500).json({ error: 'Internal server error' });
+//   }
+// });
+
+// // Start the server
+// app.listen(PORT, () => {
+//   console.log(`Server running on port ${PORT}`);
+// });
+
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -83,7 +155,6 @@ const Link = require('./models/Link'); // Ensure this path is correct based on y
 
 const app = express();
 const PORT = process.env.PORT || 5001;
-const ngrokUrl = 'https://7513-2405-201-8018-60b9-b927-e114-bcaf-47b2.ngrok-free.app'; // Your Ngrok URL
 
 app.use(cors());
 app.use(express.json());
@@ -102,8 +173,8 @@ app.get('/', (req, res) => {
 app.post('/api/generate-link', async (req, res) => {
   const { email, brand } = req.body;
 
-  // Generate a custom link with Ngrok URL
-  const uniqueLink = `${ngrokUrl}/api/click/${brand}-${Date.now()}`;
+  // Generate a custom link with the dynamic server URL
+  const uniqueLink = `${req.protocol}://${req.headers.host}/api/click/${brand}-${Date.now()}`;
 
   // Save the link to the database
   try {
@@ -123,7 +194,7 @@ app.get('/api/click/:customLink', async (req, res) => {
   try {
     // Find the link in the database and increment the click count
     const link = await Link.findOneAndUpdate(
-      { link: `${ngrokUrl}/api/click/${customLink}` }, // Match the format of the saved link
+      { link: `${req.protocol}://${req.headers.host}/api/click/${customLink}` }, // Match the format of the saved link
       { $inc: { clickCount: 1 } }, // Increment the click count
       { new: true } // Return the updated document
     );
